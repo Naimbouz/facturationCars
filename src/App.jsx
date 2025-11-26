@@ -8,9 +8,13 @@ function App() {
     clientName: '',
     registration: '',
     car: '',
-    service: '',
-    quantity: 1,
-    unitPrice: 0
+    serviceLines: [
+      {
+        service: '',
+        quantity: 1,
+        unitPrice: 0
+      }
+    ]
   });
 
   useEffect(() => {
@@ -24,6 +28,27 @@ function App() {
     setFormData(prev => ({
       ...prev,
       [name]: value
+    }));
+  };
+
+  const handleAddLine = () => {
+    setFormData(prev => ({
+      ...prev,
+      serviceLines: [
+        ...prev.serviceLines,
+        {
+          service: '',
+          quantity: 1,
+          unitPrice: 0
+        }
+      ]
+    }));
+  };
+
+  const handleRemoveLine = (index) => {
+    setFormData(prev => ({
+      ...prev,
+      serviceLines: prev.serviceLines.filter((_, i) => i !== index)
     }));
   };
 
@@ -53,7 +78,12 @@ function App() {
       </header>
 
       <main>
-        <InvoiceForm data={formData} onChange={handleInputChange} />
+        <InvoiceForm
+          data={formData}
+          onChange={handleInputChange}
+          onAddLine={handleAddLine}
+          onRemoveLine={handleRemoveLine}
+        />
         <InvoiceSummary data={formData} />
         <button className="btn" onClick={() => window.print()}>
           Imprimer la facture

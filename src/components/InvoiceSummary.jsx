@@ -1,10 +1,15 @@
 import React from 'react';
 
 const InvoiceSummary = ({ data }) => {
-    const quantity = parseInt(data.quantity) || 0;
-    const unitPrice = parseFloat(data.unitPrice) || 0;
+    let subtotal = 0;
 
-    const subtotal = quantity * unitPrice;
+    // Calculate subtotal from all service lines
+    data.serviceLines.forEach(line => {
+        const quantity = parseInt(line.quantity) || 0;
+        const unitPrice = parseFloat(line.unitPrice) || 0;
+        subtotal += quantity * unitPrice;
+    });
+
     const tvaRate = 0.20; // 20% VAT
     const tva = subtotal * tvaRate;
     const total = subtotal + tva;
