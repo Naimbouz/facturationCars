@@ -1,6 +1,8 @@
 import React from 'react';
+import { useCurrency } from '../contexts/CurrencyContext';
 
 const InvoiceSummary = ({ data }) => {
+    const { symbol, rate } = useCurrency();
     let subtotal = 0;
 
     // Calculate subtotal from all service lines
@@ -12,24 +14,27 @@ const InvoiceSummary = ({ data }) => {
 
     const tvaRate = 0.20; // 20% VAT
     const tva = subtotal * tvaRate;
-    const total = subtotal + tva;
+    const timbreFiscal = 1.00; // Timbre fiscal fixe à 1€
+    const total = subtotal + tva + timbreFiscal;
 
-    const formatCurrency = (amount) => {
-        return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(amount);
-    };
+    const formatCurrency = (amount) => `${(amount * rate).toFixed(2)} ${symbol}`;
 
     return (
         <div className="summary-section">
             <div className="summary-row">
-                <span>Total HT</span>
+                <span>TOTAL HT</span>
                 <span>{formatCurrency(subtotal)}</span>
             </div>
             <div className="summary-row">
-                <span>TVA (20%)</span>
+                <span>TOTAL TVA (20%)</span>
                 <span>{formatCurrency(tva)}</span>
             </div>
             <div className="summary-row">
-                <span>Total TTC</span>
+                <span>TIMBRE FISCAL</span>
+                <span>{formatCurrency(timbreFiscal)}</span>
+            </div>
+            <div className="summary-row summary-total">
+                <span>TOTAL TTC</span>
                 <span>{formatCurrency(total)}</span>
             </div>
         </div>
