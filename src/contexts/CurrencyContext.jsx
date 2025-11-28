@@ -14,10 +14,10 @@ const currencyMap = {
     symbol: '€',
     rate: 1
   },
-  DZD: {
-    code: 'DZD',
-    symbol: 'د.ج',
-    rate: 215 // Approximate conversion, can be adjusted or fetched dynamically
+  TND: {
+    code: 'TND',
+    symbol: 'د.ت',
+    rate: 3.2 // Approximate conversion (1 EUR ≈ 3.2 TND), adjust or fetch dynamically as needed
   }
 };
 

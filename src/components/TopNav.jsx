@@ -21,7 +21,7 @@ const TopNav = () => {
           onChange={(e) => setCurrency(e.target.value)}
         >
           <option value="EUR">EUR (€)</option>
-          <option value="DZD">DZD (د.ج)</option>
+          <option value="TND">Dinar tunisien (TND) (د.ت)</option>
         </select>
       </div>
     </nav>
