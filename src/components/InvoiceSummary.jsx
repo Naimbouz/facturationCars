@@ -14,8 +14,8 @@ const InvoiceSummary = ({ data }) => {
 
     const tvaRate = 0.20; // 20% VAT
     const tva = subtotal * tvaRate;
-    const timbreFiscal = 1.00; // Timbre fiscal fixe à 1€
-    const total = subtotal + tva + timbreFiscal;
+    const timbreFiscalBase = 1.00; // Timbre fiscal fixe à 1 (base in EUR); displayed value converts using rate
+    const total = subtotal + tva + timbreFiscalBase;
 
     const formatCurrency = (amount) => `${(amount * rate).toFixed(2)} ${symbol}`;
 

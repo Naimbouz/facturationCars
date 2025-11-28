@@ -1,4 +1,5 @@
 import React from 'react';
+import { useCurrency } from '../contexts/CurrencyContext';
 
 const InvoiceForm = ({ data, onChange, onAddLine, onRemoveLine }) => {
   const cars = [
@@ -33,6 +34,8 @@ const InvoiceForm = ({ data, onChange, onAddLine, onRemoveLine }) => {
     };
     onChange('serviceLines', newServiceLines);
   };
+
+  const { symbol, currency } = useCurrency();
 
   return (
     <div className="form-grid">
@@ -87,7 +90,7 @@ const InvoiceForm = ({ data, onChange, onAddLine, onRemoveLine }) => {
         <div className="service-table-header">
           <div className="service-col">Désignation Service</div>
           <div className="quantity-col">Quantité</div>
-          <div className="price-col">P.U. HT (€)</div>
+          <div className="price-col">P.U. HT ({currency} {symbol})</div>
           <div className="action-col"></div>
         </div>
 
@@ -126,6 +129,7 @@ const InvoiceForm = ({ data, onChange, onAddLine, onRemoveLine }) => {
                 step="0.01"
                 value={line.unitPrice}
                 onChange={(e) => handleServiceLineChange(index, 'unitPrice', e.target.value)}
+                placeholder={`Prix unitaire (${symbol})`}
               />
             </div>
 
