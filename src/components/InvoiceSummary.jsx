@@ -5,8 +5,9 @@ const InvoiceSummary = ({ data }) => {
     const { symbol, rate } = useCurrency();
     let subtotal = 0;
 
-    // Calculate subtotal from all service lines
-    data.serviceLines.forEach(line => {
+    // Calculate subtotal from all service lines (guard if data or serviceLines missing)
+    const lines = data?.serviceLines ?? [];
+    lines.forEach(line => {
         const quantity = parseInt(line.quantity) || 0;
         const unitPrice = parseFloat(line.unitPrice) || 0;
         subtotal += quantity * unitPrice;
@@ -14,10 +15,13 @@ const InvoiceSummary = ({ data }) => {
 
     const tvaRate = 0.20; // 20% VAT
     const tva = subtotal * tvaRate;
-    const timbreFiscalBase = 1.00; // Timbre fiscal fixe à 1 (base in EUR); displayed value converts using rate
-    const total = subtotal + tva + timbreFiscalBase;
+    const timbreFiscal = 1.00; // Timbre fiscal fixe à 1 (base in EUR); displayed value converts using rate
+    const total = subtotal + tva + timbreFiscal;
 
-    const formatCurrency = (amount) => `${(amount * rate).toFixed(2)} ${symbol}`;
+    const formatCurrency = (amount) => {
+        const num = Number(amount) || 0;
+        return `${(num * rate).toFixed(2)} ${symbol}`;
+    };
 
     return (
         <div className="summary-section">
