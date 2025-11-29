@@ -2,9 +2,9 @@
 import React, { createContext, useState, useContext, useMemo } from 'react';
 
 const CurrencyContext = createContext({
-  currency: 'EUR',
-  symbol: '€',
-  rate: 1,
+  currency: 'TND',
+  symbol: 'د.ت',
+  rate: 3.2,
   setCurrency: () => {}
 });
 
@@ -22,7 +22,7 @@ const currencyMap = {
 };
 
 export const CurrencyProvider = ({ children }) => {
-  const [currency, setCurrency] = useState('EUR');
+  const [currency, setCurrency] = useState('TND');
 
   const value = useMemo(() => {
     const info = currencyMap[currency];
