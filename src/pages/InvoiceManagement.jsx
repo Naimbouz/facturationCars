@@ -4,6 +4,7 @@ import TopNav from '../components/TopNav';
 import InvoiceForm from '../components/InvoiceForm';
 import InvoiceFilterBar from '../components/InvoiceFilterBar';
 import InvoiceFooter from '../components/InvoiceFooter';
+import * as XLSX from 'xlsx';
 import { useCurrency } from '../contexts/CurrencyContext';
 
 const InvoiceManagement = () => {
@@ -220,6 +221,35 @@ const InvoiceManagement = () => {
     }
   };
 
+  const handleExportXLSX = () => {
+    try {
+      const rows = invoices.map((inv) => {
+        const totals = computeTotals(inv);
+        const servicesText = (inv.serviceLines || [])
+          .map(l => `${l.service || ''} x${l.quantity || 0} @${l.unitPrice || 0}`)
+          .join(' ; ');
+
+        return {
+          ID: inv.id,
+          Client: inv.clientName || '',
+          Immatriculation: inv.registration || '',
+          Vehicule: inv.car || '',
+          Date: inv.createdAt ? new Date(inv.createdAt).toLocaleString('fr-FR') : '',
+          Total_TTC: formatCurrency(totals.total),
+          Services: servicesText
+        };
+      });
+
+      const ws = XLSX.utils.json_to_sheet(rows);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'Factures');
+      XLSX.writeFile(wb, 'factures.xlsx');
+    } catch (err) {
+      console.error('Export XLSX failed', err);
+      alert('Erreur lors de l\'export XLSX. Voir la console.');
+    }
+  };
+
   return (
     <>
       <TopNav />
@@ -235,6 +265,9 @@ const InvoiceManagement = () => {
             </Link>
             <button className="btn" type="button" onClick={fetchInvoices} disabled={isLoading}>
               {isLoading ? 'Actualisation...' : 'Actualiser'}
+            </button>
+            <button className="btn" type="button" onClick={() => handleExportXLSX()}>
+              Exporter XLSX
             </button>
           </div>
         </header>
