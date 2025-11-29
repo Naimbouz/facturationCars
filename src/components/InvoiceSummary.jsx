@@ -13,10 +13,11 @@ const InvoiceSummary = ({ data }) => {
         subtotal += quantity * unitPrice;
     });
 
-    const tvaRate = 0.20; // 20% VAT
+    const tvaRate = 0.19; // 19% VAT
     const tva = subtotal * tvaRate;
-    const timbreFiscal = 1.00; // Timbre fiscal fixe à 1 (base in EUR); displayed value converts using rate
-    const total = subtotal + tva + timbreFiscal;
+    // Make timbre fiscal equal to 1 TND: when symbol is TND, convert 1 TND into base units so formatCurrency shows 1
+    const timbreFiscalBase = (symbol === 'د.ت') ? (1 / rate) : 1.0;
+    const total = subtotal + tva + timbreFiscalBase;
 
     const formatCurrency = (amount) => {
         const num = Number(amount) || 0;
@@ -30,12 +31,12 @@ const InvoiceSummary = ({ data }) => {
                 <span>{formatCurrency(subtotal)}</span>
             </div>
             <div className="summary-row">
-                <span>TOTAL TVA (20%)</span>
+                <span>TOTAL TVA (19%)</span>
                 <span>{formatCurrency(tva)}</span>
             </div>
             <div className="summary-row">
                 <span>TIMBRE FISCAL</span>
-                <span>{formatCurrency(timbreFiscal)}</span>
+                <span>{formatCurrency(timbreFiscalBase)}</span>
             </div>
             <div className="summary-row summary-total">
                 <span>TOTAL TTC</span>

@@ -103,24 +103,51 @@ function App() {
         throw new Error('Failed to save invoice');
       }
 
+      const data = await response.json();
       await fetchInvoices();
-      return true;
+      // return the saved invoice id so caller can use it
+      return data?.id ?? null;
     } catch (error) {
       console.error(error);
-      return false;
+      return null;
     } finally {
       setIsSaving(false);
     }
   };
 
   const handlePrintInvoice = async () => {
-    // Ensure invoice is persisted before printing
-    const saved = await handleSaveInvoice();
-    if (saved) {
-      window.print();
-    } else {
+    // Ensure invoice is persisted before printing and export on server
+    const savedId = await handleSaveInvoice();
+    if (!savedId) {
       alert("Impossible d'enregistrer la facture avant impression.");
+      return;
     }
+
+    try {
+      // fetch the saved invoice from server to get full data (with serviceLines)
+      const resp = await fetch('http://localhost:4000/api/invoices');
+      if (resp.ok) {
+        const list = await resp.json();
+        const invoice = list.find(i => Number(i.id) === Number(savedId));
+        if (invoice) {
+          // capture the printable element's HTML so server can render pixel-perfect PDF
+          const printable = document.querySelector('.invoice-container.printable');
+          let htmlFragment = '';
+          if (printable) htmlFragment = printable.outerHTML;
+
+          await fetch('http://localhost:4000/api/export-pdf', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ ...invoice, html: htmlFragment })
+          });
+        }
+      }
+    } catch (err) {
+      console.error('Failed to export invoice before print', err);
+      // continue to print even if export failed
+    }
+
+    window.print();
   };
 
   const formatDate = (date) => {
@@ -143,10 +170,11 @@ function App() {
       const unitPrice = parseFloat(line.unitPrice) || 0;
       subtotal += quantity * unitPrice;
     });
-    const tvaRate = 0.20;
+    const tvaRate = 0.19;
     const tva = subtotal * tvaRate;
-    const timbreFiscal = 1.00;
-    return (subtotal + tva + timbreFiscal) * rate;
+    // Ensure timbre fiscal is 1 TND regardless of display currency: convert to base units
+    const timbreFiscalBase = (symbol === 'د.ت') ? (1 / rate) : 1.0;
+    return (subtotal + tva + timbreFiscalBase) * rate;
   };
 
   return (

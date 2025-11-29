@@ -53,9 +53,9 @@ const InvoiceManagement = () => {
       const unitPrice = Number(line.unitPrice) || 0;
       return sum + quantity * unitPrice;
     }, 0) || 0;
-    const tvaRate = 0.2;
-    const timbreFiscal = 1;
-    return (subtotal + subtotal * tvaRate + timbreFiscal) * rate;
+    const tvaRate = 0.19;
+    const timbreFiscalBase = (symbol === 'د.ت') ? (1 / rate) : 1;
+    return (subtotal + subtotal * tvaRate + timbreFiscalBase) * rate;
   };
 
   const getFilteredInvoices = () => {
@@ -104,9 +104,9 @@ const InvoiceManagement = () => {
       const unitPrice = Number(line.unitPrice) || 0;
       return sum + quantity * unitPrice;
     }, 0) || 0;
-    const tvaRate = 0.2;
-    const timbreFiscal = 1;
-    const total = subtotal + subtotal * tvaRate + timbreFiscal;
+    const tvaRate = 0.19;
+    const timbreFiscalBase = (symbol === 'د.ت') ? (1 / rate) : 1;
+    const total = subtotal + subtotal * tvaRate + timbreFiscalBase;
     return { subtotal, total };
   };
 
