@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import InvoiceForm from './components/InvoiceForm';
 import InvoiceSummary from './components/InvoiceSummary';
+import InvoiceFooter from './components/InvoiceFooter';
 import TopNav from './components/TopNav';
 import { useCurrency } from './contexts/CurrencyContext';
 
@@ -134,16 +135,30 @@ function App() {
 
   const formatCurrency = (amount) => `${(amount * rate).toFixed(2)} ${symbol}`;
 
+  const calculateTotalTTC = () => {
+    let subtotal = 0;
+    const lines = formData?.serviceLines ?? [];
+    lines.forEach(line => {
+      const quantity = parseInt(line.quantity) || 0;
+      const unitPrice = parseFloat(line.unitPrice) || 0;
+      subtotal += quantity * unitPrice;
+    });
+    const tvaRate = 0.20;
+    const tva = subtotal * tvaRate;
+    const timbreFiscal = 1.00;
+    return (subtotal + tva + timbreFiscal) * rate;
+  };
+
   return (
     <>
       <TopNav />
-      <div className="invoice-container">
+      <div className="invoice-container printable">
       <header className="header">
         <div className="company-info">
-          <h1>AutoService Pro</h1>
-          <p>123 Avenue de la Mécanique</p>
-          <p>75000 Paris</p>
-          <p>Tel: 01 23 45 67 89</p>
+          <h1>STE AJK PERFECT AUTO </h1>
+          <p>171 Mostapha Mohsen-Borj Louzir 2073</p>
+          <p>Tel: 98 201 461</p>
+          <p>RIB: 05203000072300271066</p>
         </div>
         <div className="date-section">
           <p>Date de facturation</p>
@@ -159,6 +174,7 @@ function App() {
           onRemoveLine={handleRemoveLine}
         />
         <InvoiceSummary data={formData} />
+        <InvoiceFooter totalTTC={calculateTotalTTC()} symbol={symbol} />
         <div className="button-row">
           <button className="btn" onClick={handlePrintInvoice} disabled={isSaving}>
             {isSaving ? 'Veuillez patienter...' : 'Imprimer la facture'}

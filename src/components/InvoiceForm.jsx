@@ -1,25 +1,10 @@
 import React from 'react';
 import { useCurrency } from '../contexts/CurrencyContext';
+import { useElements } from '../contexts/ElementsContext';
 
 const InvoiceForm = ({ data, onChange, onAddLine, onRemoveLine }) => {
-  const cars = [
-    "Toyota Corolla",
-    "Volkswagen Golf",
-    "Renault Clio",
-    "Peugeot 208",
-    "Ford Fiesta",
-    "Mercedes A-Class",
-    "BMW 1 Series"
-  ];
-
-  const services = [
-    "Vidange",
-    "Changement de pneus",
-    "Révision complète",
-    "Changement de plaquettes",
-    "Diagnostic électronique",
-    "Lavage complet"
-  ];
+  const { symbol, currency } = useCurrency();
+  const { services, cars } = useElements();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -34,8 +19,6 @@ const InvoiceForm = ({ data, onChange, onAddLine, onRemoveLine }) => {
     };
     onChange('serviceLines', newServiceLines);
   };
-
-  const { symbol, currency } = useCurrency();
 
   return (
     <div className="form-grid">

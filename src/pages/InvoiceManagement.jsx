@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import TopNav from '../components/TopNav';
 import InvoiceForm from '../components/InvoiceForm';
+import InvoiceFilterBar from '../components/InvoiceFilterBar';
+import InvoiceFooter from '../components/InvoiceFooter';
 import { useCurrency } from '../contexts/CurrencyContext';
 
 const InvoiceManagement = () => {
@@ -13,6 +15,12 @@ const InvoiceManagement = () => {
   const [editForm, setEditForm] = useState(null);
   const [isUpdating, setIsUpdating] = useState(false);
   const [deletingId, setDeletingId] = useState(null);
+  const [filters, setFilters] = useState({
+    clientName: '',
+    car: '',
+    dateFrom: null,
+    dateTo: null
+  });
 
   const fetchInvoices = async () => {
     setIsLoading(true);
@@ -36,6 +44,58 @@ const InvoiceManagement = () => {
   }, []);
 
   const formatCurrency = (amount) => `${(amount * rate).toFixed(2)} ${symbol}`;
+
+  const computeEditFormTotal = () => {
+    if (!editForm) return 0;
+    const subtotal = editForm.serviceLines?.reduce((sum, line) => {
+      const quantity = Number(line.quantity) || 0;
+      const unitPrice = Number(line.unitPrice) || 0;
+      return sum + quantity * unitPrice;
+    }, 0) || 0;
+    const tvaRate = 0.2;
+    const timbreFiscal = 1;
+    return (subtotal + subtotal * tvaRate + timbreFiscal) * rate;
+  };
+
+  const getFilteredInvoices = () => {
+    return invoices.filter((invoice) => {
+      // Filter by client name
+      if (filters.clientName) {
+        const name = (invoice.clientName || '').toLowerCase();
+        if (!name.includes(filters.clientName.toLowerCase())) {
+          return false;
+        }
+      }
+      // Filter by car
+      if (filters.car) {
+        const carName = (invoice.car || '').toLowerCase();
+        if (!carName.includes(filters.car.toLowerCase())) {
+          return false;
+        }
+      }
+      // Filter by date range
+      if (filters.dateFrom) {
+        const from = new Date(filters.dateFrom);
+        const invDate = new Date(invoice.createdAt);
+        if (invDate < from) {
+          return false;
+        }
+      }
+      if (filters.dateTo) {
+        const to = new Date(filters.dateTo);
+        to.setHours(23, 59, 59, 999);
+        const invDate = new Date(invoice.createdAt);
+        if (invDate > to) {
+          return false;
+        }
+      }
+      return true;
+    });
+  };
+
+  const handleFilterChange = (newFilters) => {
+    setFilters(newFilters);
+  };
 
   const computeTotals = (invoice) => {
     const subtotal = invoice.serviceLines?.reduce((sum, line) => {
@@ -181,13 +241,15 @@ const InvoiceManagement = () => {
 
         {error && <p className="error">{error}</p>}
 
+        <InvoiceFilterBar onFilter={handleFilterChange} />
+
         {isLoading && invoices.length === 0 ? (
           <p>Chargement des factures...</p>
-        ) : invoices.length === 0 ? (
-          <p>Aucune facture enregistrée pour le moment.</p>
+        ) : getFilteredInvoices().length === 0 ? (
+          <p>{invoices.length === 0 ? 'Aucune facture enregistrée pour le moment.' : 'Aucune facture ne correspond aux critères de filtre.'}</p>
         ) : (
           <div className="management-list">
-            {invoices.map((invoice) => {
+            {getFilteredInvoices().map((invoice) => {
               const totals = computeTotals(invoice);
               return (
                 <article key={invoice.id} className="invoice-card">
@@ -266,6 +328,7 @@ const InvoiceManagement = () => {
               onAddLine={handleAddEditLine}
               onRemoveLine={handleRemoveEditLine}
             />
+            <InvoiceFooter totalTTC={computeEditFormTotal()} symbol={symbol} />
             <button
               type="button"
               className="btn"
